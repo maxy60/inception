@@ -1,8 +1,20 @@
-version: '3.1'
+version: '3.8'
 
 services:
-  reverseproxy:
-    image: nginx:latest
+  nginx:
+    image: nginx
     container_name: nginx
+    build: ./srcs/nginx
     volumes:
       - /home/msainton/data/nginx.conf
+    ports:
+      - "443:443"
+    restart: on-failure
+
+  wordpress:
+    image: wordpress
+    container_name: wordpress
+    build: ./srcs/wordpress
+    restart: on-failure
+    expose:
+      - '9000'
