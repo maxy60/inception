@@ -15,6 +15,8 @@ RUN apt update && apt upgrade && apk add --no-cache\
         php7-session \
         php7-mbstring \
 
+COPY ./conf/www.conf /etc/php7/php-fpm.d/
+
 EXPOSE 9000
 
 CMD ["sh", "/conf/wp_install.sh"]

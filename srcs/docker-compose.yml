@@ -6,15 +6,29 @@ services:
     container_name: nginx
     build: ./srcs/nginx
     volumes:
-      - /home/msainton/data/nginx.conf
+      - wordpress_volume:/home/msainton/data/wordpress
+      - reverse_proxy_volume:/home/msainton/data/proxy
     ports:
       - "443:443"
     restart: on-failure
+    networks:
+      - my-network
 
   wordpress:
     image: wordpress
     container_name: wordpress
     build: ./srcs/wordpress
+    volumes:
+      - wordpress_volume:/home/msainton/data/wordpress
     restart: on-failure
     expose:
       - '9000'
+    networks:
+      - my-network
+networks:
+  my-network:
+    driver: bridge
+
+volumes:
+  wordpress_volume:
+  reverse_proxy_volume:
