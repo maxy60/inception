@@ -1,22 +1,24 @@
-COMMAND		=	docker compose
+DOCKER_PATH	=	/home/msainton/data
+COMMAND	=	docker compose
 
-PATH		= /home/maxime/data
+all		: build up
 
-DOCKER_FILE	=	srcs/docker-compose.yml
+build :
+	mkdir -p $(DOCKER_PATH)/wordpress
+	mkdir -p $(DOCKER_PATH)/mariadb
+	$(COMMAND) -f srcs/docker-compose.yml build
 
-all :	build
+up		:
+	$(COMMAND) -f srcs/docker-compose.yml up -d
 
-build :	
-		mkdir -p /home/msainton/data/wordpress
-		mkdir -p /home/msainton/data/proxy
-		${COMMAND} -f srcs/docker-compose.yml build
+clean:
+	docker system prune -a --volumes
+	docker rm -vf wordpress nginx
+	docker rmi -f wordpress nginx
 
-up :	
-		${COMMAND} -f srcs/docker-compose.yml up -d
+fclean: clean
+	sudo rm -rf ${DOCKER_PATH}
 
-clean :	${COMMAND} -f srcs/docker-compose.yml stop
+re : fclean all
 
-fclean :	${COMMAND} -f srcs/docker-compose.yml stop
-		docker system prune -a --force --volumes
-
-re :		fclean build up
+.PHONY: all re down clean fclean

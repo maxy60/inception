@@ -1,34 +1,68 @@
 version: '3.8'
 
 services:
-  nginx:
-    image: nginx
-    container_name: nginx
-    build: ./srcs/nginx
+  mariadb:
+    image: mariadb
+    container_name: mariadb
+    build: ./srcs/mariadb
     volumes:
-      - wordpress_volume:/home/msainton/data/wordpress
-      - reverse_proxy_volume:/home/msainton/data/proxy
-    ports:
-      - "443:443"
+      - mariadb_volume:/var/lib/mariadb
+    env_file:
+      - .env
+    expose:
+      - "3306"
     restart: on-failure
-    networks:
-      - my-network
 
   wordpress:
     image: wordpress
     container_name: wordpress
     build: ./srcs/wordpress
     volumes:
-      - wordpress_volume:/home/msainton/data/wordpress
+      - wordpress_volume:/var/www/wordpress
+    env_file:
+      - .env
     restart: on-failure
     expose:
-      - '9000'
+      - "9000"
     networks:
       - my-network
+    depends_on:
+      - mariadb
+
+  nginx:
+    image: nginx
+    container_name: nginx
+    build: ./srcs/nginx
+    volumes:
+      - wordpress_volume:/var/www/wordpress
+    env_file:
+      - .env
+    ports:
+      - "443:443"
+    restart: on-failure
+    networks:
+      - my-network
+    depends_on:
+      - wordpress
+
 networks:
   my-network:
+    name: my-network
     driver: bridge
-
+# o: option de montage pour monter de ssysteme de fichier locaux(sur machine hôte)
+# driver opts options suplementaire pour volume ici pour partage de fichier
 volumes:
   wordpress_volume:
-  reverse_proxy_volume:
+    name: wordpress
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/msainton/data/wordpress
+      o: bind
+  mariadb_volume:
+    name: mariadb
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/msainton/data/mariadb
+      o: bind

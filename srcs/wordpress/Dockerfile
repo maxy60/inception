@@ -1,22 +1,36 @@
 FROM alpine:3.16
 
 #update && install  necessary to wordpress
-RUN apt update && apt upgrade && apk add --no-cache\
-        php7-fpm \
-        php7-mysqli \
-        php7-pdo_mysql \
-        php7-gd \
-        php7-curl \
-        php7-json \
-        php7-zip \
-        php7-opcache \
-        php7-xml \
-        php7-dom \
-        php7-session \
-        php7-mbstring \
+RUN apk update && apk upgrade && apk add --no-cache\
+	curl\
+	mariadb-client\
+	php\
+	php8-curl\
+	php8-ctype\
+	php8-dom\
+	php8-exif\
+	php8-fileinfo\
+	php8-fpm\
+	php8-gd\
+	php8-iconv\
+	php8-intl\
+	php8-mbstring\
+	php8-mysqli\
+	php8-pecl-imagick\
+	php8-phar\
+	php8-redis\
+	php8-session\
+	php8-xml\
+	php8-zip
 
-COPY ./conf/www.conf /etc/php7/php-fpm.d/
+RUN adduser -D -g 'www' www\
+	&& mkdir -p /var/www/wordpress\
+	&& chown www:www /var/www/wordpress
+
+COPY ./conf/www.conf /etc/php8/php-fpm.d/
 
 EXPOSE 9000
 
-CMD ["sh", "/conf/wp_install.sh"]
+COPY ./tools/wp_install.sh /tmp/wp_install.sh
+
+CMD ["sh", "/tmp/wp_install.sh"]
