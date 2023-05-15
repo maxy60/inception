@@ -6,9 +6,11 @@ RUN apk update && apk upgrade && apk add --no-cache\
         mariadb-client\
         mariadb-common
 
-COPY conf/my.cnf /etc/my.cnf.d
+COPY conf/my.cnf /etc/
+COPY conf/mariadb-server.cnf /etc/my.cnf.d/
 COPY ./tools/db_install.sh /tmp/db_install.sh
 
 EXPOSE 3306
 
 CMD ["sh", "/tmp/db_install.sh"]
+#CMD ["ping", "0.0.0.0"]
