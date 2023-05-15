@@ -11,13 +11,16 @@ build :
 up		:
 	$(COMMAND) -f srcs/docker-compose.yml up -d
 
-clean:
-	docker system prune -a --volumes
-	docker rm -vf wordpress nginx
-	docker rmi -f wordpress nginx
+stop	:
+	$(COMMAND) -f srcs/docker-compose.yml stop wordpress nginx mariadb
 
-fclean: clean
+clean: stop
+	docker system prune -a --force
+
+fclean: stop
 	sudo rm -rf ${DOCKER_PATH}
+	docker system prune -a --force --volumes
+	docker volume rm -f mariadb wordpress
 
 re : fclean all
 
