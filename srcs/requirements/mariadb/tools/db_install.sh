@@ -7,7 +7,6 @@ if [ -d /var/lib/mysql/mysql ]; then
 	exit 1
 fi
 
-echo "Installing..."
 mkdir -p /var/lib/mysql
 chown -R mysql:mysql /var/lib/mysql
 
@@ -16,11 +15,11 @@ mariadb-install-db --auth-root-authentication-method=normal --basedir=/usr --dat
 cat << eof > tmp_mdb
 DELETE FROM mysql.user WHERE User = 'root';
 FLUSH PRIVILEGES;
-CREATE USER 'root'@'localhost' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD';
-GRANT ALL ON *.* TO 'root'@'localhost' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD' WITH GRANT OPTION;
-SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$MYSQL_ROOT_PASSWORD');
-CREATE USER '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD';
-GRANT ALL ON $WP_DB_NAME.* TO '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD';
+CREATE USER 'root'@'localhost' IDENTIFIED BY '$DB_ROOT_PASSWORD';
+GRANT ALL ON *.* TO 'root'@'localhost' IDENTIFIED BY '$DB_ROOT_PASSWORD' WITH GRANT OPTION;
+SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$DB_ROOT_PASSWORD');
+CREATE USER '$DB_USER'@'%' IDENTIFIED BY '$DB_PASSWORD';
+GRANT ALL ON $DB_NAME.* TO '$DB_USER'@'%' IDENTIFIED BY '$DB_PASSWORD';
 FLUSH PRIVILEGES;
 eof
 
