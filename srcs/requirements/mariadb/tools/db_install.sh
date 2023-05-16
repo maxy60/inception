@@ -1,30 +1,52 @@
-touch tmp_mdb
-chmod 755 tmp_mdb
+#! /bin/sh
 
-if [ -d /var/lib/mysql/mysql ]; then
-	echo "Already set up, starting..."
-	exec /usr/bin/mysqld --user=mysql --skip-networking=0 --console $@
-	exit 1
-fi
 
-mkdir -p /var/lib/mysql
-chown -R mysql:mysql /var/lib/mysql
+DATADIR=/var/lib/mysql
 
-mariadb-install-db --auth-root-authentication-method=normal --basedir=/usr --datadir=/var/lib/mysql --skip-test-db --user=mysql
 
-cat << eof > tmp_mdb
-DELETE FROM mysql.user WHERE User = 'root';
+# This function set the default options to mariadb database
+secure_database()
+{
+	cat << EOF | mysql_secure_installation
+
+Y
+n
+Y
+Y
+Y
+Y
+EOF
+}
+
+
+# Create the wordpress database
+create_database()
+{
+	cat << EOF | mariadb -u root
+CREATE DATABASE $DB_NAME;
+GRANT ALL PRIVILEGES ON $DB_NAME.* TO "$DB_USER"@"localhost" IDENTIFIED BY "$DB_PASSWORD";
+GRANT ALL PRIVILEGES ON $DB_NAME.* TO "$DB_USER"@"%" IDENTIFIED BY "$DB_PASSWORD";
 FLUSH PRIVILEGES;
-CREATE USER 'root'@'localhost' IDENTIFIED BY '$DB_ROOT_PASSWORD';
-GRANT ALL ON *.* TO 'root'@'localhost' IDENTIFIED BY '$DB_ROOT_PASSWORD' WITH GRANT OPTION;
-SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$DB_ROOT_PASSWORD');
-CREATE USER '$DB_USER'@'%' IDENTIFIED BY '$DB_PASSWORD';
-GRANT ALL ON $DB_NAME.* TO '$DB_USER'@'%' IDENTIFIED BY '$DB_PASSWORD';
-FLUSH PRIVILEGES;
-eof
+EOF
+}
 
-/usr/bin/mysqld --user=mysql --bootstrap --verbose=0 --skip-name-resolve --skip-networking=0 < tmp_mdb
 
-rm -f tmp_mdb
+main()
+{
+	if [ ! -z "$(ls -A $DATADIR)" ];
+	then
+		rc-service mariadb start
+		rc-service mariadb stop
+	else
+		mariadb-install-db --rpm
+		rc-service mariadb start
+		secure_database
+		create_database
+		rc-service mariadb restart
+		rc-service mariadb stop
+	fi
+}
 
-exec /usr/bin/mysqld --user=mysql --skip-networking=0 --console $@
+
+main
+exec /usr/bin/mysqld --user=mysql --console

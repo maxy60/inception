@@ -9,9 +9,11 @@ services:
       - mariadb_volume:/var/lib/mariadb
     env_file:
       - .env
+    restart: on-failure
     expose:
       - "3306"
-    restart: on-failure
+    networks:
+      - my-network
 
   wordpress:
     image: wordpress
@@ -47,8 +49,6 @@ services:
 
 networks:
   my-network:
-    name: my-network
-    driver: bridge
 # o: option de montage pour monter de ssysteme de fichier locaux(sur machine hôte)
 # driver opts options suplementaire pour volume ici pour partage de fichier
 volumes:

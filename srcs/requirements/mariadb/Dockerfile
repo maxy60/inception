@@ -4,7 +4,11 @@ FROM alpine:3.16
 RUN apk update && apk upgrade && apk add --no-cache\
         mariadb\
         mariadb-client\
-        mariadb-common
+        mariadb-common\
+        openrc
+
+RUN openrc\
+	&& touch /run/openrc/softlevel
 
 COPY conf/my.cnf /etc/
 COPY conf/mariadb-server.cnf /etc/my.cnf.d/
